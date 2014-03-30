@@ -5,6 +5,7 @@ using System.ServiceModel.Channels;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Remoting.Messaging;
 using System.Net.Sockets;
+using System.IO;
 
 namespace TraceService
 {
@@ -40,6 +41,8 @@ namespace TraceService
 
 			if (HasReturn)
 			{
+				BufferedStream bs = new BufferedStream(stream);
+
 				Return = formatter.Deserialize(stream);
 				if (Return is string)
 				{

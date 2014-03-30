@@ -12,12 +12,6 @@ namespace TraceService
 	[ServiceBehavior(IncludeExceptionDetailInFaults = true)]
 	public class TraceServiceProxy : ServiceProxy, ITraceService
 	{
-		private ITraceService _service;
-
-		TcpClient Client;
-
-		NetworkStream ClientStream;
-
 		/// <summary>
 		/// Initializes a new instance of the <see cref="TraceService.TraceServiceProxy"/> class.
 		/// </summary>
@@ -28,8 +22,8 @@ namespace TraceService
 //				factory.Open(TimeSpan.FromSeconds(10));
 			//_service = ChannelFactory<ITraceService>.CreateChannel(new NetTcpBinding(), new EndpointAddress(uri));
 //			_service = factory.CreateChannel(new EndpointAddress(uri));
-			Client = new TcpClient("localhost", 7777);
-			ClientStream = Client.GetStream();
+//			Client = new TcpClient("localhost", 7777);
+//			ClientStream = Client.GetStream();
 		}
 
 		/// <summary>
@@ -39,7 +33,6 @@ namespace TraceService
 		/// <remarks>ITraceService implementation</remarks>
 		public void Trace(TraceMessage message)
 		{
-//			Formatter.Serialize(ClientStream, message);
 			base.Invoke(new ServiceMethodCall(typeof(ITraceService), "Trace", message));
 		}
 
@@ -49,7 +42,6 @@ namespace TraceService
 		/// <remarks>ITraceService implementation</remarks>
 		public void ExitTraceService()
 		{
-//			_service.ExitTraceService();
 			base.Invoke(new ServiceMethodCall(typeof(ITraceService), "ExitTraceService"));
 		}
 	}

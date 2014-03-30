@@ -1,44 +1,12 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="TraceService/TraceMessage.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="TraceService/TraceServiceProxy.cs">
     <Files>
       <File FileName="TraceService/TraceServiceProxy.cs" Line="46" Column="12" />
-      <File FileName="TraceService/ServiceProxy.cs" Line="8" Column="2" />
-      <File FileName="TraceService/Service.cs" Line="92" Column="38" />
-      <File FileName="TraceService/Server.cs" Line="96" Column="6" />
-      <File FileName="TraceService/TraceService.cs" Line="66" Column="11" />
-      <File FileName="TraceService/ServiceMethodCall.cs" Line="38" Column="4" />
-      <File FileName="TraceService/MainClass.cs" Line="64" Column="34" />
-      <File FileName="TraceClientTest/MainClass.cs" Line="27" Column="4" />
-      <File FileName="TraceService/TraceMessage.cs" Line="20" Column="4" />
     </Files>
-    <Pads>
-      <Pad Id="ProjectPad">
-        <State expanded="True">
-          <Node name="TraceClientTest" expanded="True" />
-          <Node name="TraceService" expanded="True">
-            <Node name="TraceMessage.cs" selected="True" />
-          </Node>
-        </State>
-      </Pad>
-      <Pad Id="ClassPad">
-        <State expanded="True" selected="True" />
-      </Pad>
-      <Pad Id="MonoDevelop.Debugger.WatchPad">
-        <State>
-          <Value>Data</Value>
-          <Value>Message</Value>
-          <Value>this</Value>
-          <Value>OperationContext.Current</Value>
-          <Value>OperationContext.Current.Channel.RemoteAddress.Uri</Value>
-        </State>
-      </Pad>
-    </Pads>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
-  <MonoDevelop.Ide.DebuggingService.PinnedWatches>
-    <Watch file="TraceService/TraceServiceProxy.cs" line="35" offsetX="403" offsetY="780" expression="_service" liveUpdate="False" />
-  </MonoDevelop.Ide.DebuggingService.PinnedWatches>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
 </Properties>

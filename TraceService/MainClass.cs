@@ -50,7 +50,7 @@ namespace TraceService
 				using (Server = new Server<ITraceService>(Service))
 				{
 					Console.WriteLine("Started server for service {0} at {1} using {2}", Service.GetType().Name, Service.Uri.ToString(), Service.Formatter.GetType().Name);
-					while (Server.IsRunning || Service.IsRunning)
+					while (/*Server.IsRunning || */ Service.IsRunning)
 						Thread.Sleep(50);
 					Console.WriteLine("Closing service host...");
 				}

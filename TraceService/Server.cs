@@ -92,7 +92,7 @@ namespace TraceService
 				while (Listener.Pending())
 				{
 					TcpClient client = Listener.AcceptTcpClient();
-					Service.ClientStreams.Add(client.GetStream());
+					Service.Clients.Add(client);
 				}
 				Thread.Yield();
 			}

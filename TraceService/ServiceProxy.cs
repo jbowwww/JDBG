@@ -12,20 +12,23 @@ namespace TraceService
 
 		public readonly IRemotingFormatter Formatter;
 
+		protected readonly TcpClient Service;
+
 		protected readonly NetworkStream ServiceStream;
 
 		public ServiceProxy(Uri uri, IRemotingFormatter formatter)
 		{
 			Uri = uri;
 			Formatter = formatter;
-			TcpClient service = new TcpClient(uri.Host, uri.Port);
-			ServiceStream = service.GetStream();
+			Service = new TcpClient(uri.Host, uri.Port);
+
+			ServiceStream = Service.GetStream();
 		}
 
 		public void Invoke(ServiceMethodCall methodCall)
 		{
 			methodCall.InvokeFromProxy(Formatter, ServiceStream);
-
+			int size = Service.Available;
 		}
 
 	}

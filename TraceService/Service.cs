@@ -16,7 +16,7 @@ namespace TraceService
 
 		public readonly IRemotingFormatter Formatter;
 
-		public readonly ConcurrentBag<Stream> ClientStreams;
+		public readonly ConcurrentBag<TcpClient> Clients;
 
 		protected Thread ServiceThread;
 
@@ -32,7 +32,7 @@ namespace TraceService
 		{
 			Uri = uri;
 			Formatter = formatter;
-			ClientStreams = new ConcurrentBag<Stream>();
+			Clients = new ConcurrentBag<TcpClient>();
 			if (start)
 				Start();
 		}
@@ -84,15 +84,17 @@ namespace TraceService
 		{
 			while (!ExitServiceThread)
 			{
-				foreach (Stream stream in ClientStreams)
+				foreach (TcpClient client in Clients)
 				{
-					if (stream != null && stream is NetworkStream)
+					if (client != null)
 					{
-						NetworkStream clientStream = stream as NetworkStream;
+						NetworkStream clientStream = client.GetStream();
 						if (clientStream.DataAvailable)
 						{
+							int size = client.Available;
 							ServiceMethodCall.InvokeMethod(Formatter, clientStream, this);
-							
+							size = client.Available;
+							;
 
 						}
 					}
