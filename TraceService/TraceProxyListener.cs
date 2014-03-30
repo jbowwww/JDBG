@@ -2,11 +2,11 @@ using System;
 
 namespace TraceService
 {
-	public class ServiceProxyListener : Listener, IDisposable
+	public class TraceProxyListener : Listener, IDisposable
 	{
 		public TraceProxy Proxy { get; private set; }
 
-		public ServiceProxyListener(TraceProxy proxy)
+		public TraceProxyListener(TraceProxy proxy)
 		{
 			Proxy = proxy;
 		}

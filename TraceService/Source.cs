@@ -75,16 +75,16 @@ namespace TraceService
 		/// <summary>
 		/// The _sources.
 		/// </summary>
-		private ConcurrentBag<Listener> _listeners;
+		public readonly ConcurrentBag<Listener> Listeners;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="TraceService.TraceServiceSource"/> class.
+		/// Initializes a new instance of the <see cref="TraceService.Source"/> class.
 		/// </summary>
 		/// <param name="name">Name.</param>
 		public Source(string name, bool start = true, params Listener[] listeners)
 		{
 			_messageQueue = new ConcurrentQueue<Message>();
-			_listeners = new ConcurrentBag<Listener>(listeners);
+			Listeners = new ConcurrentBag<Listener>(listeners);
 			//, SourceLevels levels = SourceLevels.All)
 			if (start)
 				Start();
@@ -149,7 +149,7 @@ namespace TraceService
 					while (_messageQueue.TryDequeue(out message))
 					{
 //					Listener[] listeners = _listeners.ToArray();
-						foreach (Listener listener in _listeners)
+						foreach (Listener listener in Listeners)
 						{
 							listener.Trace(message);
 						}

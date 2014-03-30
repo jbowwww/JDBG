@@ -22,7 +22,9 @@ namespace TraceService
 
 		public readonly MethodInfo Method;
 
-		public bool HasReturn { get { return Method.ReturnParameter != null; } }
+		public bool HasReturn {
+			get { return Method.ReturnParameter != null && !Method.ReturnParameter.ParameterType.Equals(typeof(void)); }
+		}
 
 		public MethodCall(Type serviceType, string methodName, params object[] arguments)
 		{

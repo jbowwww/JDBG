@@ -89,6 +89,7 @@ namespace TraceService
 		/// </summary>
 		public void RunService()
 		{
+
 			while (!ExitServiceThread)
 			{
 				foreach (TcpClient client in Clients)

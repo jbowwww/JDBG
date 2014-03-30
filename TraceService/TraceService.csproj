@@ -52,9 +52,9 @@
     <Compile Include="Message.cs" />
     <Compile Include="Source.cs" />
     <Compile Include="MethodCall.cs" />
-    <Compile Include="ServiceProxyListener.cs" />
     <Compile Include="MessageLevelEnum.cs" />
     <Compile Include="ConsoleListener.cs" />
+    <Compile Include="TraceProxyListener.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
