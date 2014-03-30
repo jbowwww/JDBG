@@ -1,5 +1,0 @@
-30/03/2014 7:02:53 PM: Process.Site=null:5/: Test Trace
-Data (1 values):
-	value1=System.Object
-Stack:
-   at TraceClientTest.MainClass.Main(System.String[] argv) in /home/jk/Code/Projects/NET/JDBG/TraceClientTest/MainClass.cs:line 34

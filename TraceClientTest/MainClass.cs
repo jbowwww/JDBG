@@ -11,9 +11,8 @@ namespace TraceClientTest
 {
 	public static class MainClass
 	{
-//		public static ChannelFactory<ITraceService> Factory;
-
-		public static TraceProxy Trace;
+		public readonly static Source Trace = Source.GetOrCreate("TraceClientTest", true, new ConsoleListener());
+			public static TraceProxy TestService;
 
 		public static Process TraceServiceProcess;
 
@@ -30,16 +29,17 @@ namespace TraceClientTest
 //			else
 //			{
 				Console.WriteLine("Service started, opening client proxy...");
-			Trace = new TraceProxy(new BinaryFormatter());
-				Message tm = new Message("Test Trace");
-				tm.Data.Add("value1", new object());
-			Trace.Trace(tm);
-				Trace.ExitTraceService();
+			TestService = new TraceProxy(new BinaryFormatter());
+//				Message tm = new Message("Test Trace");
+//				tm.Data.Add("value1", new object());
+			Trace.Log(MessageLevel.Information, "", "Testicles 1 2", new Guid());//(tm);
+			TestService.ExitTraceService();
 				Thread.Sleep(3000);
 //			}
 //			}
 
-			Console.WriteLine("Exiting client...");
+			Console.WriteLine("Exiting client & TraceService.Sourecs...");
+			Source.CloseAll();
 		}
 	}
 }

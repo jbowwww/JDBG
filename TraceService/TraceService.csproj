@@ -54,6 +54,7 @@
     <Compile Include="MethodCall.cs" />
     <Compile Include="ServiceProxyListener.cs" />
     <Compile Include="MessageLevelEnum.cs" />
+    <Compile Include="ConsoleListener.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

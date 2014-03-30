@@ -26,14 +26,14 @@ namespace TraceService
 		public const int LoopDelay = 100;
 
 		/// <summary>
-		/// The exit all source threads.
-		/// </summary>
-		private static bool ExitAllSourceThreads;
-
-		/// <summary>
 		/// The _sources.
 		/// </summary>
 		private static ConcurrentDictionary<string, Source> _sources;
+
+		/// <summary>
+		/// The exit all source threads.
+		/// </summary>
+		private static bool ExitAllSourceThreads;
 
 		/// <summary>
 		/// Gets the or create.
@@ -47,6 +47,14 @@ namespace TraceService
 			if (!_sources.ContainsKey(name))
 				_sources.TryAdd(name, new Source(name, start, listeners));
 			return _sources[name];
+		}
+
+		/// <summary>
+		/// Closes all.
+		/// </summary>
+		public static void CloseAll()
+		{
+			ExitAllSourceThreads = true;
 		}
 
 		/// <summary>
@@ -118,7 +126,7 @@ namespace TraceService
 		/// </summary>
 		public void Start()
 		{
-			SourceThread = new Thread((thisService) => ((Service)thisService).RunService())
+			SourceThread = new Thread((thisService) => ((Source)thisService).Run())
 			{
 				Name = "TraceService.Source.Run",
 				Priority = ThreadPriority.BelowNormal
@@ -137,7 +145,15 @@ namespace TraceService
 					Thread.Sleep(LoopDelay);
 				else
 				{
-					// TODO
+					Message message;
+					while (_messageQueue.TryDequeue(out message))
+					{
+//					Listener[] listeners = _listeners.ToArray();
+						foreach (Listener listener in _listeners)
+						{
+							listener.Trace(message);
+						}
+					}
 				}
 			}
 		}
