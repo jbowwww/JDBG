@@ -10,31 +10,62 @@ using System.Reflection;
 namespace TraceService
 {
 	[Serializable]
-	public class TraceMessage : ISerializable
+	public class Message : ISerializable
 	{
+		public uint Id { get; internal set; }
+
+		public Source TraceSource { get; internal set; }
+
 		public DateTime Time { get; protected set; }
 
-		public string Message { get; protected set; }
+		public MessageLevel Level { get; internal set; }													//
 
-		public IDictionary<string, object> Data { get; protected set; }
+		public string Category { get; set; }															//
+
+		public string Description { get; set; }														//
+
+		public IDictionary<string, object> Data { get; protected set; }		//
 
 		public StackTrace Stack { get; protected set; }
 
-//		[NonSerialized]
+		public AppDomain SourceDomain { get; protected set; }
+
 		public Process SourceProcess { get; protected set; }
 
-//		[NonSerialized]
 		public ProcessThread SourceThread { get; protected set; }
 
-		public TraceMessage(string message)
+		public Thread TraceThread { get; protected set; }
+
+		public int ThreadId { get; protected set; }
+
+		public string ThreadName { get; protected set; }
+
+		public Message(params object[] data)		// string message)
 		{
 			Time = DateTime.Now;
-			Message = message;
-			Data = new Dictionary<string, object>();
+//			Message = message;
 			Stack = new StackTrace(1, true);
 
+			int di = 0;
+			Data = new Dictionary<string, object>();
+			foreach (object d in data)
+			{
+				di++;
+				Type dType = d.GetType();
+				if (dType.IsGenericType && dType.GetGenericTypeDefinition().IsEquivalentTo(
+					typeof(KeyValuePair<object,object>).GetGenericTypeDefinition()))
+				{
+					KeyValuePair<object, object> dPair = (KeyValuePair<object, object>)d;
+					Data.Add(dPair.Key.ToString(), dPair.Value);
+				}
+				else
+					Data.Add(string.Format("Data{0:d2}", di), d);
+			}
+
+			SourceDomain = AppDomain.CurrentDomain;
 			SourceProcess = Process.GetCurrentProcess();
 			SourceProcess.Refresh();
+			
 //			foreach (ProcessThread pt in SourceProcess.Threads)
 //			{
 //				if (pt.Id == Thread.CurrentThread.ManagedThreadId)
@@ -43,15 +74,22 @@ namespace TraceService
 //					break;
 //				}
 //			}
+			TraceThread = Thread.CurrentThread;
+			ThreadId = TraceThread.ManagedThreadId;
+			ThreadName = TraceThread.Name;
 		}
 
-		protected TraceMessage(SerializationInfo info, StreamingContext context)
+		protected Message(SerializationInfo info, StreamingContext context)
 		{
 			Time = info.GetDateTime("Time");
-			Message = info.GetString("Message");
+			Description = info.GetString("Message");
 			Data = (IDictionary<string, object>)info.GetValue("Data", typeof(IDictionary<string, object>));
 			Stack = (StackTrace)info.GetValue("Stack", typeof(StackTrace));
+
 			SourceProcess = Process.GetProcessById(info.GetInt32("ProcessId"));
+			ThreadId = info.GetInt32("ThreadId");
+			ThreadName = info.GetString("ThreadName");
+
 //			int threadId = info.GetInt32("ThreadId");
 //			foreach (ProcessThread pt in SourceProcess.Threads)
 //			{
@@ -73,11 +111,12 @@ namespace TraceService
 		public void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
 			info.AddValue("Time", Time);
-			info.AddValue("Message", Message);
+			info.AddValue("Message", Description);
 			info.AddValue("Data", Data);
 			info.AddValue("Stack", Stack);
 			info.AddValue("ProcessId", SourceProcess.Id);
-//			info.AddValue("ThreadId", SourceThread.Id);
+			info.AddValue("ThreadId", SourceThread != null ? SourceThread.Id : TraceThread != null ? TraceThread.ManagedThreadId : 0);
+			info.AddValue("ThreadName", TraceThread.Name);
 		}
 //			MemberInfo[] members = FormatterServices.GetSerializableMembers(typeof(TraceMessage), context);
 //			object[] memberValues = FormatterServices.GetObjectData(this, members);
@@ -94,10 +133,11 @@ namespace TraceService
 
 		public override string ToString()
 		{
-			StringBuilder sb = new StringBuilder(string.Format("{0}: {1}:{2}/{3}: {4}\n", Time.ToString(),
-				SourceProcess == null ? "Process=null" : SourceProcess.Site == null ? "Process.Site=null" : SourceProcess.Site.Name, 
+			StringBuilder sb = new StringBuilder(string.Format("{0}: {1}: {2}/{3}: {4}/{5}: {6}\n", Time.ToString(),
+				SourceProcess.MachineName, SourceProcess.Id, SourceProcess.ProcessName, ThreadId, ThreadName, Description));
+//				SourceProcess == null ? "Process=null" : SourceProcess..Site == null ? "Process.Site=null" : SourceProcess.Site.Name, 
 				//SourceThread.Id, SourceThread.Site.Name,
-				Thread.CurrentThread.ManagedThreadId, Thread.CurrentThread.Name, Message));
+			
 			if (Data != null && Data.Count > 0)
 			{
 				sb.AppendLine(string.Format("Data ({0} values):", Data.Count.ToString()));

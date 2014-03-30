@@ -10,7 +10,7 @@ using System.IO;
 namespace TraceService
 {
 	[Serializable]
-	public class ServiceMethodCall
+	public class MethodCall
 	{
 		public readonly Type ServiceType;
 
@@ -24,7 +24,7 @@ namespace TraceService
 
 		public bool HasReturn { get { return Method.ReturnParameter != null; } }
 
-		public ServiceMethodCall(Type serviceType, string methodName, params object[] arguments)
+		public MethodCall(Type serviceType, string methodName, params object[] arguments)
 		{
 			ServiceType = serviceType;
 			MethodName = methodName;
@@ -57,7 +57,7 @@ namespace TraceService
 
 		internal static void InvokeMethod(IRemotingFormatter formatter, NetworkStream stream, object obj)
 		{
-			ServiceMethodCall methodCall = (ServiceMethodCall)formatter.Deserialize(stream);
+			MethodCall methodCall = (MethodCall)formatter.Deserialize(stream);
 			methodCall.Return = methodCall.Method.Invoke(obj, methodCall.Arguments);
 			if (methodCall.HasReturn)
 			{

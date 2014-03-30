@@ -51,7 +51,7 @@ namespace TraceService
 		/// </summary>
 		/// <param name="message">Message.</param>
 		/// <remarks>ITraceService implementation</remarks>
-		public void Trace(TraceMessage message)
+		public void Trace(Message message)
 		{
 			byte[] buf = Encoding.ASCII.GetBytes(message.ToString());
 			_file.Write(buf, 0, buf.Length);

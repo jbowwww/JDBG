@@ -25,7 +25,7 @@ namespace TraceService
 			ServiceStream = Service.GetStream();
 		}
 
-		public void Invoke(ServiceMethodCall methodCall)
+		public void Invoke(MethodCall methodCall)
 		{
 			methodCall.InvokeFromProxy(Formatter, ServiceStream);
 			int size = Service.Available;

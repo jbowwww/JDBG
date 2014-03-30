@@ -13,7 +13,7 @@ namespace TraceClientTest
 	{
 //		public static ChannelFactory<ITraceService> Factory;
 
-		public static TraceServiceProxy Trace;
+		public static TraceProxy Trace;
 
 		public static Process TraceServiceProcess;
 
@@ -30,8 +30,8 @@ namespace TraceClientTest
 //			else
 //			{
 				Console.WriteLine("Service started, opening client proxy...");
-			Trace = new TraceServiceProxy(new BinaryFormatter());
-				TraceMessage tm = new TraceMessage("Test Trace");
+			Trace = new TraceProxy(new BinaryFormatter());
+				Message tm = new Message("Test Trace");
 				tm.Data.Add("value1", new object());
 			Trace.Trace(tm);
 				Trace.ExitTraceService();

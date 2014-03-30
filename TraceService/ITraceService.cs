@@ -4,7 +4,7 @@ namespace TraceService
 {
 	public interface ITraceService
 	{
-		void Trace(TraceMessage message);
+		void Trace(Message message);
 		void ExitTraceService();
 	}
 }

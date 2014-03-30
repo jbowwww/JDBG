@@ -41,14 +41,19 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MainClass.cs" />
-    <Compile Include="TraceMessage.cs" />
     <Compile Include="TraceService.cs" />
-    <Compile Include="TraceServiceProxy.cs" />
     <Compile Include="Service.cs" />
     <Compile Include="Server.cs" />
     <Compile Include="ServiceProxy.cs" />
-    <Compile Include="ServiceMethodCall.cs" />
     <Compile Include="ITraceService.cs" />
+    <Compile Include="MessageLogListener.cs" />
+    <Compile Include="Listener.cs" />
+    <Compile Include="TraceProxy.cs" />
+    <Compile Include="Message.cs" />
+    <Compile Include="Source.cs" />
+    <Compile Include="MethodCall.cs" />
+    <Compile Include="ServiceProxyListener.cs" />
+    <Compile Include="MessageLevelEnum.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

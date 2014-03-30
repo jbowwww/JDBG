@@ -10,12 +10,12 @@ namespace TraceService
 	/// Trace service proxy.
 	/// </summary>
 	[ServiceBehavior(IncludeExceptionDetailInFaults = true)]
-	public class TraceServiceProxy : ServiceProxy, ITraceService
+	public class TraceProxy : ServiceProxy, ITraceService
 	{
 		/// <summary>
 		/// Initializes a new instance of the <see cref="TraceService.TraceServiceProxy"/> class.
 		/// </summary>
-		public TraceServiceProxy(IRemotingFormatter formatter, string uri = "net.tcp://localhost:7777/Trace")
+		public TraceProxy(IRemotingFormatter formatter, string uri = "net.tcp://localhost:7777/Trace")
 			: base(new Uri(uri), formatter)
 		{
 //			if (factory.State == CommunicationState.Created)
@@ -31,9 +31,9 @@ namespace TraceService
 		/// </summary>
 		/// <param name="message">Message.</param>
 		/// <remarks>ITraceService implementation</remarks>
-		public void Trace(TraceMessage message)
+		public void Trace(Message message)
 		{
-			base.Invoke(new ServiceMethodCall(typeof(ITraceService), "Trace", message));
+			base.Invoke(new MethodCall(typeof(ITraceService), "Trace", message));
 		}
 
 		/// <summary>
@@ -42,7 +42,7 @@ namespace TraceService
 		/// <remarks>ITraceService implementation</remarks>
 		public void ExitTraceService()
 		{
-			base.Invoke(new ServiceMethodCall(typeof(ITraceService), "ExitTraceService"));
+			base.Invoke(new MethodCall(typeof(ITraceService), "ExitTraceService"));
 		}
 	}
 }

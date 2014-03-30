@@ -10,6 +10,13 @@ using System.Runtime.Remoting.Messaging;
 
 namespace TraceService
 {
+	/// <summary>
+	/// Service.
+	/// </summary>
+	/// <remarks>
+	/// Should be able to (eventually) - completely abstract the communication between Service and ServiceProxy
+	/// (Is this what is called IoC or not??) - Currently MethodCall is basically doing this - generalise this class into a new one
+	/// </remarks>
 	public abstract class Service : IDisposable
 	{
 		public readonly Uri Uri;
@@ -92,7 +99,7 @@ namespace TraceService
 						if (clientStream.DataAvailable)
 						{
 							int size = client.Available;
-							ServiceMethodCall.InvokeMethod(Formatter, clientStream, this);
+							MethodCall.InvokeMethod(Formatter, clientStream, this);
 							size = client.Available;
 							;
 
