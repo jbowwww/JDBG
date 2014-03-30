@@ -37,13 +37,15 @@ namespace TraceService
 
 		internal void InvokeFromProxy(IRemotingFormatter formatter, NetworkStream stream)
 		{
-			formatter.Serialize(stream, this);
-
+			MemoryStream ms = new MemoryStream();
+			formatter.Serialize(ms, this);
+			IAsyncResult async = stream.BeginWrite(ms.GetBuffer(), 0, (int)ms.Length, null, null);
 			if (HasReturn)
 			{
-				BufferedStream bs = new BufferedStream(stream);
-
-				Return = formatter.Deserialize(stream);
+				stream.EndWrite(async);
+//				vc		ms = new MemoryStream(stream.
+//						IAsyncResult asyncR = stream.c
+				Return = formatter.Deserialize(stream);		// Determine if this deseerializstaion need t be async too - see if this syn read bottlenecks
 				if (Return is string)
 				{
 					if ((Return as string).Equals("{null}"))
@@ -61,9 +63,12 @@ namespace TraceService
 			methodCall.Return = methodCall.Method.Invoke(obj, methodCall.Arguments);
 			if (methodCall.HasReturn)
 			{
-				formatter.Serialize(stream, methodCall.Return != null ?
-					(methodCall.Return is string && (methodCall.Return as string).EndsWith("{null}")) ?
-					string.Concat("/$/", methodCall.Return as string) : methodCall.Return : "{null}"); 
+				object r = methodCall.Return != null ?
+				           (methodCall.Return is string && (methodCall.Return as string).EndsWith("{null}")) ?
+				           string.Concat("/$/", methodCall.Return as string) : methodCall.Return : "{null}";
+				MemoryStream ms = new MemoryStream();
+				formatter.Serialize(ms, r); 
+				stream.BeginWrite(ms.GetBuffer(), 0, (int)ms.Length, null, null);
 			}
 		}
 	}

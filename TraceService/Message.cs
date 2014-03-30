@@ -20,9 +20,9 @@ namespace TraceService
 
 		public MessageLevel Level { get; internal set; }													//
 
-		public string Category { get; set; }															//
+		public string Category { get; internal set; }															//
 
-		public string Description { get; set; }														//
+		public string Description { get; internal set; }														//
 
 		public IDictionary<string, object> Data { get; protected set; }		//
 
@@ -131,8 +131,11 @@ namespace TraceService
 //			info.SetType(this.GetType());
 //		}
 
+		private string _toString = null;
 		public override string ToString()
 		{
+			if (_toString != null)
+				return _toString;
 			StringBuilder sb = new StringBuilder(string.Format("{0}: {1}: {2}/{3}: {4}/{5}: {6}\n", Time.ToString(),
 				SourceProcess.MachineName, SourceProcess.Id, SourceProcess.ProcessName, ThreadId, ThreadName, Description));
 //				SourceProcess == null ? "Process=null" : SourceProcess..Site == null ? "Process.Site=null" : SourceProcess.Site.Name, 
@@ -149,7 +152,7 @@ namespace TraceService
 				sb.AppendLine("Stack:");
 				sb.AppendLine(Stack.ToString());
 			}
-			return sb.ToString();
+			return _toString = sb.ToString();
 		}
 	}
 }

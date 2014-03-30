@@ -40,12 +40,12 @@ namespace TraceService
 		/// </summary>
 		/// <returns>The or create.</returns>
 		/// <param name="name">Name.</param>
-		public static Source GetOrCreate(string name, params Listener[] listeners)
+		public static Source GetOrCreate(string name, bool start = false, params Listener[] listeners)
 		{
 			if (_sources == null)
 				_sources = new ConcurrentDictionary<string, Source>();
 			if (!_sources.ContainsKey(name))
-				_sources.TryAdd(name, new Source(name, listeners));
+				_sources.TryAdd(name, new Source(name, start, listeners));
 			return _sources[name];
 		}
 
