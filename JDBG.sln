@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TraceClientTest", "TraceClientTest\TraceClientTest.csproj", "{77008E28-B987-4B34-B735-8C07E5756737}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TraceService", "TraceService\TraceService.csproj", "{9A0DCB7E-EAE7-4D15-9707-E9EFAF76A070}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{77008E28-B987-4B34-B735-8C07E5756737}.Debug|x86.ActiveCfg = Debug|x86
+		{77008E28-B987-4B34-B735-8C07E5756737}.Debug|x86.Build.0 = Debug|x86
+		{77008E28-B987-4B34-B735-8C07E5756737}.Release|x86.ActiveCfg = Release|x86
+		{77008E28-B987-4B34-B735-8C07E5756737}.Release|x86.Build.0 = Release|x86
+		{9A0DCB7E-EAE7-4D15-9707-E9EFAF76A070}.Debug|x86.ActiveCfg = Debug|x86
+		{9A0DCB7E-EAE7-4D15-9707-E9EFAF76A070}.Debug|x86.Build.0 = Debug|x86
+		{9A0DCB7E-EAE7-4D15-9707-E9EFAF76A070}.Release|x86.ActiveCfg = Release|x86
+		{9A0DCB7E-EAE7-4D15-9707-E9EFAF76A070}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = TraceClientTest\TraceClientTest.csproj
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,5 @@
+30/03/2014 1:37:05 PM Test Trace
+Data (1 values):
+	value1=System.Object
+Stack:
+   at TraceClientTest.MainClass.Main(System.String[] argv) in /home/jk/Code/Projects/NET/JDBG/TraceClientTest/MainClass.cs:line 34
