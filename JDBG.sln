@@ -5,12 +5,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TraceClientTest", "TraceCli
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TraceService", "TraceService\TraceService.csproj", "{9A0DCB7E-EAE7-4D15-9707-E9EFAF76A070}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JService", "..\JService\JService.csproj", "{46112645-11E0-49B9-82D6-047753ED466A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{46112645-11E0-49B9-82D6-047753ED466A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{46112645-11E0-49B9-82D6-047753ED466A}.Release|x86.ActiveCfg = Release|Any CPU
 		{77008E28-B987-4B34-B735-8C07E5756737}.Debug|x86.ActiveCfg = Debug|x86
 		{77008E28-B987-4B34-B735-8C07E5756737}.Debug|x86.Build.0 = Debug|x86
 		{77008E28-B987-4B34-B735-8C07E5756737}.Release|x86.ActiveCfg = Release|x86
