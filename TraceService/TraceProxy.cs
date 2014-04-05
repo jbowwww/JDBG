@@ -20,6 +20,7 @@ namespace TraceService
 
 		private readonly object _proxyLock = new object();
 
+		[ThreadStatic]
 		ChannelFactory<ITraceService> _factory;
 
 		[ThreadStatic]
@@ -31,6 +32,16 @@ namespace TraceService
 			{
 				lock (_proxyLock)
 				{
+					if (_factory == null)
+					{
+						_factory = new ChannelFactory<ITraceService>(Binding, Endpoint);
+						Console.WriteLine("Client: Created factory {0} - {1}", _factory.ToString(), _factory.State.ToString());
+					}
+					if (_factory.State == CommunicationState.Created)
+					{
+						_factory.Open();
+						Console.WriteLine("Client: Opening factory {0} - {1}", _factory.ToString(), _factory.State.ToString());
+					}
 					if (_channel == null)
 					{
 						_channel = _factory.CreateChannel();
@@ -53,16 +64,6 @@ namespace TraceService
 		{
 			Binding = binding;
 			Endpoint = endpoint;
-			if (_factory == null)
-			{
-				_factory = new ChannelFactory<ITraceService>(Binding, Endpoint);
-				Console.WriteLine("Client: Created factory {0}", _factory.ToString());
-			}
-			if (_factory.State == CommunicationState.Created)
-			{
-				_factory.Open();
-				Console.WriteLine("Client: Opening factory {0} - {1}", _factory.ToString(), _factory.State.ToString());
-			}
 		}
 //			_channel = ChannelFactory<ITraceService>.CreateChannel(binding, endpoint);
 //			using (ChannelFactory<ITraceService> _factory = new ChannelFactory<ITraceService>(binding, endpoint))
@@ -93,7 +94,7 @@ namespace TraceService
 					if (commObj.State == CommunicationState.Opened)
 					{
 						commObj.Close();
-						Console.WriteLine("Client: Closed channel {0}", _channel.ToString());
+						Console.WriteLine("Client: Closed channel {0} - {1}", _channel.ToString(), commObj.State.ToString());
 					}
 					_channel = null;
 				}
@@ -102,7 +103,7 @@ namespace TraceService
 					if (_factory.State == CommunicationState.Opened)
 					{
 						_factory.Close();
-						Console.WriteLine("Client: Closed factory {0}", _factory.ToString());
+						Console.WriteLine("Client: Closed factory {0} - {1}", _factory.ToString(), _factory.State.ToString());
 					}
 					_factory = null;
 //				((IDisposable)_factory).Dispose();

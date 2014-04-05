@@ -14,7 +14,7 @@ namespace TraceService
 		[DataMember]
 		public DateTime Time { get; internal set; }
 
-		public readonly Source Source { get; internal set; }
+		public Source Source { get; internal set; }
 
 		[DataMember]
 		public string SourceName { get; private set; }

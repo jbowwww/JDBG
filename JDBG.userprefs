@@ -1,35 +1,21 @@
 ﻿<Properties>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Release|x86" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="TraceService/TraceServiceSurrogate.cs">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="TraceService/Message.cs">
     <Files>
-      <File FileName="TraceService/TraceServiceSurrogate.cs" Line="46" Column="37" />
-      <File FileName="TraceService/Message.cs" Line="24" Column="17" />
-      <File FileName="TraceService/Surrogates/DictionarySurrogated.cs" Line="5" Column="49" />
+      <File FileName="TraceService/TraceServiceSurrogate.cs" Line="1" Column="1" />
+      <File FileName="TraceService/Message.cs" Line="33" Column="45" />
+      <File FileName="TraceService/Surrogates/DictionarySurrogated.cs" Line="1" Column="1" />
+      <File FileName="TraceClientTest/MainClass.cs" Line="1" Column="1" />
+      <File FileName="TraceService/Source.cs" Line="1" Column="1" />
+      <File FileName="TraceService/TraceProxy.cs" Line="1" Column="1" />
+      <File FileName="TraceService/TraceProxyListener.cs" Line="1" Column="1" />
+      <File FileName="TraceService/TraceService.cs" Line="1" Column="1" />
     </Files>
-    <Pads>
-      <Pad Id="ProjectPad">
-        <State expanded="True">
-          <Node name="TraceClientTest" expanded="True" />
-          <Node name="TraceService" expanded="True">
-            <Node name="Surrogates" expanded="True" />
-            <Node name="TraceServiceSurrogate.cs" selected="True" />
-          </Node>
-        </State>
-      </Pad>
-      <Pad Id="ClassPad">
-        <State expanded="True" selected="True" />
-      </Pad>
-      <Pad Id="MonoDevelop.Debugger.WatchPad">
-        <State>
-          <Value>Trace</Value>
-          <Value>OperationContext.Current</Value>
-          <Value>MainClass</Value>
-        </State>
-      </Pad>
-    </Pads>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
-    <BreakpointStore />
+    <BreakpointStore>
+      <Breakpoint file="/home/jk/Code/Projects/NET/JDBG/TraceService/Message.cs" line="124" column="1" />
+    </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
 </Properties>

@@ -30,30 +30,37 @@ namespace TraceClientTest
 
 		public static void Main(string[] argv)
 		{
-			using (TraceServiceProcess = Process.Start("../../../TraceService/bin/Debug/TraceService.exe"))
+			using (TraceServiceProcess = Process.Start("../../../TraceService/bin/Debug/TraceService.exe"))		//	new Thread(() => { TraceService.MainClass.Main(new string[] { }); }).Start(); 
 			{
-				Console.ReadKey();
+				Console.WriteLine("Service Process: Started: {0}", TraceServiceProcess.StartTime);
+				TraceServiceProcess.OutputDataReceived += (sender, e) => Console.WriteLine("Service Process: Output Data Received: {0}: {1}", sender, e.Data);
+				TraceServiceProcess.ErrorDataReceived += (sender, e) => Console.WriteLine("Service Process: Error Data Received: {0}: {1}", sender, e.Data);
+        		TraceServiceProcess.Disposed += (sender, e) => Console.WriteLine("Service Process: Disposed");
+				TraceServiceProcess.Exited += (sender, e) => Console.WriteLine("Service Process: Exited: {0}: {1}", TraceServiceProcess.ExitCode, TraceServiceProcess.ExitTime);
+
+				Thread.Sleep(1100);
+				Console.ReadLine();
 				Console.WriteLine("Client: Creating proxy...");
-//			new Thread(() => { TraceService.MainClass.Main(new string[] { }); }).Start(); 
-//				Thread.Sleep(1000);
+				using (TestProxy = new TraceProxy(Binding, new EndpointAddress(BaseUri)))
+				{
+					Trace.Listeners.Add(new TraceProxyListener(TestProxy));
 
-				TestProxy = new TraceProxy(Binding, new EndpointAddress(BaseUri));
-				Trace.Listeners.Add(new TraceProxyListener(TestProxy));
+					Trace.Log(MessageLevel.Information, "Test", "Testicles 1 2", new Guid());
+					Trace.Log(MessageLevel.Verbose, "Test", "Bitses", new BitArray(32));
 
-				Trace.Log(new TraceService.Message(new Guid()) { Level = MessageLevel.Information, Category = "Test", Description = "Testicles 1 2" });
-				Trace.Log(new TraceService.Message(new BitArray(32)) { Level = MessageLevel.Verbose, Category = "Test", Description = "Bitses" });
+					Source.StopAll();
+					Source.WaitAll();
 
-//				Thread.Sleep(1800);
+					Console.WriteLine("Client: Stopped trace sources, closing proxy");
 
-				Console.WriteLine("Client: Stopping trace sources, closing proxy and service processes and exiting...");
+					TestProxy.Close();
+				}
 
-				Source.StopAll();
-				Source.WaitAll();
-//				Thread.Sleep(2000);
+				Console.WriteLine("Client: Stopping service processes and exiting...");
 
-				TestProxy.Close();
-//				TraceServiceProcess.Close();
-//				TraceServiceProcess.WaitForExit();
+				TraceServiceProcess.Close();
+				TraceServiceProcess.WaitForExit();
+
 			}
 		}
 	}
