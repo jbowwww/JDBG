@@ -5,7 +5,7 @@ namespace TraceService
 	/// <summary>
 	/// Listener.
 	/// </summary>
-	public abstract class Listener
+	public abstract class Listener : Disposable
 	{
 		/// <summary>
 		/// Initializes a new instance of the <see cref="TraceService.Listener"/> class.
@@ -15,9 +15,21 @@ namespace TraceService
 		}
 
 		/// <summary>
+		/// Releases unmanaged resources and performs other cleanup operations before the <see cref="TraceService.Listener"/>
+		/// is reclaimed by garbage collection.
+		/// </summary>
+		~Listener()
+		{
+			Dispose(false);
+		}
+
+		/// <summary>
 		/// Close this instance.
 		/// </summary>
-		public abstract void Close();
+		public virtual void Close()
+		{
+			Dispose();
+		}
 
 		/// <summary>
 		/// Trace the specified message.

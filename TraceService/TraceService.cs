@@ -1,12 +1,7 @@
 using System;
 using System.ServiceModel;
 using System.IO;
-using System.Xml;
 using System.Text;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Runtime.Remoting.Messaging;
-using System.Runtime.Serialization.Formatters.Binary;
 
 namespace TraceService
 {
@@ -14,33 +9,44 @@ namespace TraceService
 	/// Trace service.
 	/// </summary>
 	[ServiceBehavior(IncludeExceptionDetailInFaults = true)]
-	public class TraceService : Service, ITraceService, IDisposable
+	public class TraceService : Disposable, ITraceService
 	{
 		private FileStream _file;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="TraceService.TraceService"/> class.
 		/// </summary>
-		public TraceService(string uri = "net.tcp://localhost:7777/Trace", IRemotingFormatter formatter = null)
-			: base(new Uri(uri), formatter == null ? new BinaryFormatter() : formatter)
+		public TraceService()
 		{
 			_file = File.Open("Trace.txt", FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
+			Console.WriteLine("Service: Opened file \"{0}\"", _file.Name);
 		}
 
 		/// <summary>
-		/// Releases all resource used by the <see cref="TraceService.TraceService"/> object.
+		/// Releases unmanaged resources and performs other cleanup operations before the
+		/// <see cref="TraceService.TraceService"/> is reclaimed by garbage collection.
 		/// </summary>
-		/// <remarks>
-		/// IDisposable implementation
-		/// Call <see cref="Dispose"/> when you are finished using the <see cref="TraceService.TraceService"/>. The
-		/// <see cref="Dispose"/> method leaves the <see cref="TraceService.TraceService"/> in an unusable state. After
-		/// calling <see cref="Dispose"/>, you must release all references to the <see cref="TraceService.TraceService"/> so
-		/// the garbage collector can reclaim the memory that the <see cref="TraceService.TraceService"/> was occupying.
-		/// </remarks>
-		public override void Dispose()
+		~TraceService()
+		{
+			Dispose(false);
+		}
+
+		/// <summary>
+		/// Close this instance.
+		/// </summary>
+		public void Close()
+		{
+			Dispose();
+		}
+
+		/// <summary>
+		/// Disposes the unmanaged resources
+		/// </summary>
+		protected override void DisposeManaged()
 		{
 			if (_file != null)
 			{
+				Console.WriteLine("Service: Closing file \"{0}\"", _file.Name);
 				_file.Close();
 				_file = null;
 			}
@@ -53,17 +59,10 @@ namespace TraceService
 		/// <remarks>ITraceService implementation</remarks>
 		public void Trace(Message message)
 		{
-			byte[] buf = Encoding.ASCII.GetBytes(message.ToString());
+			Console.WriteLine("Service: Writing \"{0}\"", message.ToString());
+			byte[] buf = Encoding.ASCII.GetBytes(string.Concat(message.ToString(), "\n"));
 			_file.Write(buf, 0, buf.Length);
 			_file.Flush();
-		}
-
-		/// <summary>
-		/// Exits the trace service.
-		/// </summary>
-		public void ExitTraceService()
-		{
-			Stop();
 		}
 	}
 }

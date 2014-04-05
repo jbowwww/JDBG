@@ -1,20 +1,48 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
-  <MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.Workbench ActiveDocument="TraceService/Source.cs">
     <Files>
-      <File FileName="TraceService/TraceService.cs" Line="1" Column="1" />
-      <File FileName="TraceService/TraceProxyListener.cs" Line="1" Column="1" />
-      <File FileName="TraceClientTest/MainClass.cs" Line="27" Column="61" />
-      <File FileName="../JService/Service.cs" Line="2" Column="14" />
-      <File FileName="../JService/Message.cs" Line="17" Column="18" />
+      <File FileName="TraceService/ITraceService.cs" Line="8" Column="38" />
+      <File FileName="TraceService/TraceService.cs" Line="28" Column="4" />
+      <File FileName="TraceService/TraceProxy.cs" Line="83" Column="5" />
+      <File FileName="TraceService/Message.cs" Line="117" Column="1" />
+      <File FileName="TraceService/Source.cs" Line="77" Column="34" />
+      <File FileName="TraceClientTest/MainClass.cs" Line="43" Column="5" />
+      <File FileName="TraceService/Disposable.cs" Line="32" Column="25" />
+      <File FileName="TraceService/MainClass.cs" Line="55" Column="44" />
     </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State expanded="True">
+          <Node name="JService" expanded="True" />
+          <Node name="TraceClientTest" expanded="True">
+            <Node name="References" expanded="True" />
+          </Node>
+          <Node name="TraceService" expanded="True">
+            <Node name="Source.cs" selected="True" />
+          </Node>
+        </State>
+      </Pad>
+      <Pad Id="ClassPad">
+        <State expanded="True" selected="True" />
+      </Pad>
+      <Pad Id="MonoDevelop.Debugger.WatchPad">
+        <State>
+          <Value>Trace</Value>
+          <Value>OperationContext.Current</Value>
+        </State>
+      </Pad>
+    </Pads>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore>
-      <Breakpoint file="/home/jk/Code/Projects/NET/JDBG/TraceService/TraceService.cs" line="56" column="61" />
-      <Breakpoint file="/home/jk/Code/Projects/NET/JDBG/TraceService/Source.cs" line="105" column="1" />
-      <Breakpoint file="/home/jk/Code/Projects/NET/JDBG/TraceService/Source.cs" line="121" column="1" />
-      <Breakpoint file="/home/jk/Code/Projects/NET/JDBG/TraceService/Service.cs" line="59" column="1" />
+      <Breakpoint file="/home/jk/Code/Projects/NET/JDBG/TraceService/TraceService.cs" line="58" column="1" />
+      <Breakpoint file="/home/jk/Code/Projects/NET/JDBG/TraceService/TraceService.cs" line="44" column="1" />
+      <Breakpoint file="/home/jk/Code/Projects/NET/JDBG/TraceService/TraceService.cs" line="35" column="1" />
+      <Breakpoint file="/home/jk/Code/Projects/NET/JDBG/TraceService/TraceService.cs" line="27" column="1" />
+      <Breakpoint file="/home/jk/Code/Projects/NET/JDBG/TraceService/Source.cs" line="101" column="1" />
+      <Breakpoint file="/home/jk/Code/Projects/NET/JDBG/TraceService/Source.cs" line="145" column="1" />
+      <Breakpoint file="/home/jk/Code/Projects/NET/JDBG/TraceService/MainClass.cs" line="53" column="1" />
     </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />

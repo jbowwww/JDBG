@@ -23,14 +23,6 @@ namespace TraceService
 		}
 
 		/// <summary>
-		/// Close this instance.
-		/// </summary>
-		/// <remarks>Listener implementation</remarks>
-		public override void Close()
-		{
-		}
-
-		/// <summary>
 		/// Trace the specified message.
 		/// </summary>
 		/// <param name="message">Message.</param>
