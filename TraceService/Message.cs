@@ -7,62 +7,33 @@ using System.Threading;
 
 namespace TraceService
 {
-	[DataContract]
-	[KnownType(typeof(Dictionary<string, object>))]
 	public class Message
 	{
-		[DataMember]
-		public DateTime Time { get; set; }
+		public DateTime Time { get; internal set; }
 
-		public TraceSource Source { get; set; }
+		public readonly Source Source { get; internal set; }
 
-		[DataMember]
 		public MessageLevel Level { get; set; } 
 
-		[DataMember]
-		public int Id { get; set; }
+		public int Id { get; internal set; }
 
-		[DataMember]
 		public string Category { get; set; }
 
-		[DataMember]
 		public string Description { get; set; }
 
-//		[DataMember]
-		public IDictionary<string, object> Data { get; set; }		//
+		public IDictionary<string, object> Data { get; set; }
 
-//		[DataMember]
 		public StackTrace Stack { get; set; }
 
-//		[DataMember]
-		public AppDomain SourceDomain { get; set; }
+		public AppDomain Domain { get; set; }
 
-//		[DataMember]
-		public Process SourceProcess { get; set; }
+		public Process Process { get; set; }
 
-		[DataMember]
-		public ProcessStartInfo ProcessInfo { get; set; }
-
-		[DataMember]
 		public string MachineName { get; set; }
 
-		[DataMember]
-		public int ProcessId { get; set; }
+//		public ProcessThread SourceThread { get; set; }
 
-		[DataMember]
-		public string ProcessName { get; set; }
-
-//		[DataMember]
-		public ProcessThread SourceThread { get; set; }
-
-//		[DataMember]
 		public Thread TraceThread { get; set; }
-
-		[DataMember]
-		public int ThreadId { get; set; }
-
-		[DataMember]
-		public string ThreadName { get; set; }
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="TraceService.Message"/> class.
@@ -72,6 +43,7 @@ namespace TraceService
 		{
 			Time = DateTime.Now;
 			Stack = new StackTrace(1, true);
+			Level = MessageLevel.Information;
 
 			int di = 0;
 			Data = new Dictionary<string, object>();
@@ -89,14 +61,14 @@ namespace TraceService
 					Data.Add(string.Format("Data{0:d2}", di), d);
 			}
 
-			SourceDomain = AppDomain.CurrentDomain;
-			SourceProcess = Process.GetCurrentProcess();
+			Domain = AppDomain.CurrentDomain;
+			Process = Process.GetCurrentProcess();
 
-			MachineName = SourceProcess.MachineName;
+			MachineName = Process.MachineName;
 
-			ProcessId = SourceProcess.Id;
-			ProcessName = SourceProcess.ProcessName;
-			ProcessInfo = SourceProcess.StartInfo;
+			ProcessId = Process.Id;
+			ProcessName = Process.ProcessName;
+			ProcessInfo = Process.StartInfo;
 			
 //			SourceProcess.Refresh();
 //			foreach (ProcessThread pt in SourceProcess.Threads)

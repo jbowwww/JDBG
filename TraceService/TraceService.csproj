@@ -52,6 +52,14 @@
     <Compile Include="MessageLevelEnum.cs" />
     <Compile Include="MainClass.cs" />
     <Compile Include="Disposable.cs" />
+    <Compile Include="TraceServiceSurrogate.cs" />
+    <Compile Include="Surrogates\MessageSurrogated.cs" />
+    <Compile Include="Surrogates\SourceSurrogated.cs" />
+    <Compile Include="Surrogates\DictionarySurrogated.cs" />
+    <Compile Include="Surrogates\StackTraceSurrogated.cs" />
+    <Compile Include="Surrogates\AppDomainSurrogated.cs" />
+    <Compile Include="Surrogates\ProcessSurrogated.cs" />
+    <Compile Include="Surrogates\ThreadSurrogated.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
@@ -65,4 +73,7 @@
       </Properties>
     </MonoDevelop>
   </ProjectExtensions>
+  <ItemGroup>
+    <Folder Include="Surrogates\" />
+  </ItemGroup>
 </Project>
