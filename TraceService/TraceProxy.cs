@@ -6,6 +6,9 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.ServiceModel.Channels;
 using System.Diagnostics;
 using System.Security.AccessControl;
+using System.ServiceModel.Description;
+using System.Runtime.Serialization;
+using System.Reflection;
 
 namespace TraceService
 {
@@ -20,12 +23,13 @@ namespace TraceService
 
 		private readonly object _proxyLock = new object();
 
-		[ThreadStatic]
+//		[ThreadStatic]
 		ChannelFactory<ITraceService> _factory;
 
-		[ThreadStatic]
+//		[ThreadStatic]
 		private ITraceService _channel = null;
-//		private readonly TraceService _channel;
+
+		private IClientChannel _clientChannel = null;
 
 		protected ITraceService Channel {
 			get
@@ -35,22 +39,29 @@ namespace TraceService
 					if (_factory == null)
 					{
 						_factory = new ChannelFactory<ITraceService>(Binding, Endpoint);
-						Console.WriteLine("Client: Created factory {0} - {1}", _factory.ToString(), _factory.State.ToString());
-					}
-					if (_factory.State == CommunicationState.Created)
-					{
-						_factory.Open();
-						Console.WriteLine("Client: Opening factory {0} - {1}", _factory.ToString(), _factory.State.ToString());
+						foreach (OperationDescription op in _factory.Endpoint.Contract.Operations)
+						{
+							DataContractSerializerOperationBehavior dcsob = op.Behaviors.Find<DataContractSerializerOperationBehavior>();
+							if (dcsob == null)
+								op.Behaviors.Add(dcsob = new DataContractSerializerOperationBehavior(op, new DataContractFormatAttribute() { }));
+							dcsob.DataContractSurrogate = new TraceServiceSurrogate();			//		dcsob.DataContractResolver = new System.Runtime.Serialization.DataContractResolver
+						}
+						_factory.Opening += (sender, e) => Console.WriteLine("Client: {0}: Factory: Opening: {1} - {2}", DateTime.Now, sender.ToString(), _factory.State.ToString());
+						_factory.Opened += (sender, e) => Console.WriteLine("Client: {0}: Factory: Opened: {1} - {2}", DateTime.Now, sender.ToString(), _factory.State.ToString());
+						_factory.Closing += (sender, e) => Console.WriteLine("Client: {0}: Factory: Closing: {1} - {2}", DateTime.Now, sender.ToString(), _factory.State.ToString());
+						_factory.Closed += (sender, e) => { Console.WriteLine("Client: {0}: Factory: Closed: {1} - {2}", DateTime.Now, sender.ToString(), _factory.State.ToString()); _factory = null; };
+						_factory.Faulted += (sender, e) => Console.WriteLine("Client: {0}: Factory: Faulted: {1} - {2}", DateTime.Now, sender.ToString(), _factory.State.ToString());
 					}
 					if (_channel == null)
 					{
 						_channel = _factory.CreateChannel();
-						Console.WriteLine("Client: Created proxy channel {0} - {1}", _channel.ToString(), ((ICommunicationObject)_channel).State.ToString());
-					}
-					if (((ICommunicationObject)_channel).State == CommunicationState.Created)
-					{
-						((ICommunicationObject)_channel).Open();
-						Console.WriteLine("Client: Opening channel {0} - {1}", _channel.ToString(), ((ICommunicationObject)_channel).State.ToString());
+						_clientChannel = ((IClientChannel)_channel);
+						_clientChannel.Opening += (sender, e) => Console.WriteLine("Client: {0}: Channel: Opening: {1} - {2}", DateTime.Now, sender.ToString(), _clientChannel.State.ToString());
+						_clientChannel.Opened += (sender, e) => Console.WriteLine("Client: {0}: Channel: Opened: {1} - {2}", DateTime.Now, sender.ToString(), _clientChannel.State.ToString());
+						_clientChannel.Closing += (sender, e) => Console.WriteLine("Client: {0}: Channel: Closing: {1} - {2}", DateTime.Now, sender.ToString(), _clientChannel.State.ToString());
+						_clientChannel.Closed += (sender, e) => { Console.WriteLine("Client: {0}: Channel: Closed: {1} - {2}", DateTime.Now, sender.ToString(), _clientChannel.State.ToString()); _channel = null; };
+						_clientChannel.Faulted += (sender, e) => Console.WriteLine("Client: {0}: Channel: Faulted: {1} - {2}", DateTime.Now, sender.ToString(), _clientChannel.State.ToString());
+						_clientChannel.UnknownMessageReceived += (sender, e) => Console.WriteLine("Client: {0}: Channel: UnknownMessageReceived: {1} - {2}", DateTime.Now, sender.ToString(), _clientChannel.State.ToString());
 					}
 					return _channel;
 				}
@@ -64,13 +75,8 @@ namespace TraceService
 		{
 			Binding = binding;
 			Endpoint = endpoint;
+			LoadAssembly(Assembly.GetEntryAssembly().Location);
 		}
-//			_channel = ChannelFactory<ITraceService>.CreateChannel(binding, endpoint);
-//			using (ChannelFactory<ITraceService> _factory = new ChannelFactory<ITraceService>(binding, endpoint))
-//			{
-//				_factory.Open();
-//				_channel = _factory.CreateChannel();
-//			}
 
 		/// <summary>
 		/// Releases unmanaged resources and performs other cleanup operations before the
@@ -89,25 +95,9 @@ namespace TraceService
 			lock (_proxyLock)
 			{
 				if (_channel != null)
-				{
-					ICommunicationObject commObj = (ICommunicationObject)_channel;
-					if (commObj.State == CommunicationState.Opened)
-					{
-						commObj.Close();
-						Console.WriteLine("Client: Closed channel {0} - {1}", _channel.ToString(), commObj.State.ToString());
-					}
-					_channel = null;
-				}
+					_clientChannel.Close();
 				if (_factory != null)
-				{
-					if (_factory.State == CommunicationState.Opened)
-					{
-						_factory.Close();
-						Console.WriteLine("Client: Closed factory {0} - {1}", _factory.ToString(), _factory.State.ToString());
-					}
-					_factory = null;
-//				((IDisposable)_factory).Dispose();
-				}
+					_factory.Close();
 			}
 		}
 
@@ -120,10 +110,19 @@ namespace TraceService
 		}
 
 		/// <summary>
+		/// Loads the assembly.
+		/// </summary>
+		/// <param name="path">Path.</param>
+		public void LoadAssembly(string path)
+		{
+			Channel.LoadAssembly(path);
+		}
+
+		/// <summary>
 		/// Trace the specified message.
 		/// </summary>
 		/// <param name="message">Message.</param>
-		/// <remarks>ITraceService implementation</remarks>
+   		/// <remarks>ITraceService implementation</remarks>
 		public void Trace(Message message)
 		{
 			Channel.Trace(message);

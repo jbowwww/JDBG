@@ -2,6 +2,8 @@ using System;
 using System.ServiceModel;
 using System.IO;
 using System.Text;
+using System.Runtime.Serialization;
+using System.Reflection;
 
 namespace TraceService
 {
@@ -36,7 +38,7 @@ namespace TraceService
 		/// </summary>
 		public void Close()
 		{
-			Dispose();
+			Dispose(true);
 		}
 
 		/// <summary>
@@ -46,10 +48,19 @@ namespace TraceService
 		{
 			if (_file != null)
 			{
-				Console.WriteLine("Service: Closing file \"{0}\"", _file.Name);
+				Console.WriteLine("Service: {0}: Closing file \"{1}\"", DateTime.Now, _file.Name);
 				_file.Close();
 				_file = null;
 			}
+		}
+
+		/// <summary>
+		/// Loads the assembly.
+		/// </summary>
+		/// <param name="path">Path.</param>
+		public void LoadAssembly(string path)
+		{
+			Assembly.LoadFile(path);
 		}
 
 		/// <summary>
@@ -59,7 +70,7 @@ namespace TraceService
 		/// <remarks>ITraceService implementation</remarks>
 		public void Trace(Message message)
 		{
-			Console.WriteLine("Service: Writing \"{0}\"", message.ToString());
+			Console.WriteLine("Service: {0}: Writing \"{1}\"", DateTime.Now, message.ToString());
 			byte[] buf = Encoding.ASCII.GetBytes(string.Concat(message.ToString(), "\n"));
 			_file.Write(buf, 0, buf.Length);
 			_file.Flush();

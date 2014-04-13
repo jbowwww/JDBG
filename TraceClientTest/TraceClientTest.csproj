@@ -42,6 +42,9 @@
     <Reference Include="System.ServiceModel" />
     <Reference Include="Mono.Posix" />
     <Reference Include="System.Data.Linq" />
+    <Reference Include="Mono.Addins, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756">
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

@@ -1,91 +1,193 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.Serialization;
+using System.ServiceModel;
 using System.Text;
 using System.Threading;
-using System.IO;
+using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Reflection;
+using System.IO;
+using System.Runtime.Remoting.Messaging;
 
 namespace TraceService
 {
+	[MessageContract]
 	[DataContract]
+	[ServiceKnownType(typeof(System.Guid))]
+	[KnownType(typeof(System.Guid))]
 	public class Message
 	{
+		[MessageHeader]
 		[DataMember]
 		public DateTime Time { get; internal set; }
 
-		public Source Source { get; internal set; }
+//		private AppDomain _domain;
+
+//		[MessageHeader]
+		public AppDomain Domain { get; set; }
+
+		[MessageHeader]
+		[DataMember]
+		public string DomainName { get; set; }
+
+		[MessageHeader]
+		[DataMember]
+		public int DomainId { get; set; }
+
+//		[MessageHeader]
+//		public long DomainSurvivedMemorySize { get; set; }
+//
+//		[MessageHeader]
+//		public long DomainTotalMemorySize { get; set; }
+//
+//		[MessageHeader]
+//		public TimeSpan DomainTotalProcessorTime { get; set; }
+
+		[MessageHeader]
+		[DataMember]
+		public string DomainBaseDirectory { get; set; }
+
+		[MessageHeader]
+		[DataMember]
+		public string DomainDynamicDirectory { get; set; }
+
+			private Process _process;
+//		[MessageHeader]
+		public Process Process {
+			get { return _process; }
+			set
+			{
+				if ((_process = value) != null)
+				{
+					MachineName = _process.MachineName;
+					ProcessId = _process.Id;
+					ProcessName = _process.ProcessName;
+				}
+			}
+		}
 
 		[DataMember]
-		public MessageLevel Level { get; set; } 
+				[MessageHeader]
+				public string MachineName { get; set; }
 
+		[MessageHeader]
+		[DataMember]
+				public int ProcessId { get; set; }
+
+		[MessageHeader]
+		[DataMember]
+		public string ProcessName { get; set; }
+
+		public Thread Thread { get; set; }
+
+		[MessageHeader]
+		[DataMember]
+		public int ThreadId { get; set; }
+
+		[MessageHeader]
+		[DataMember]
+		public string ThreadName { get; set; }
+
+		[MessageHeader]
+		[DataMember]
+		public ThreadPriority ThreadPriority { get; set; }
+
+		[MessageHeader]
+		[DataMember]
+		public System.Threading.ThreadState ThreadState { get; set; }
+
+		[MessageHeader]
+		[DataMember]
+		public Source Source { get; internal set; }
+
+		[MessageHeader]
 		[DataMember]
 		public int Id { get; internal set; }
 
+		[MessageHeader]
+		[DataMember]
+		public MessageLevel Level { get; set; } 
+
+		[MessageHeader]
 		[DataMember]
 		public string Category { get; set; }
 
+		[MessageHeader]
 		[DataMember]
 		public string Description { get; set; }
 
-		public IDictionary<string, object> Data { get; set; }
+//		[MessageBodyMember]
+//		[DataMember]
+//		[KnownType(typeof(System.Guid))]
+		public Dictionary<string, object> Data { get; set; }
 
-		[DataMember]
-		public MemoryStream DataStream { get; internal set; }
-
-		public byte[] DataBytes { get; set; }
-
+//		[MessageBodyMember]
+//		[DataMember]
 		public StackTrace Stack { get; set; }
 
-		public AppDomain Domain { get; set; }
-
+		[MessageBodyMember]
 		[DataMember]
-		public string MachineName { get; set; }
-
-		public Process Process { get; set; }
-
-		[DataMember]
-		public int ProcessId { get; set; }
-//			get { return Process == null ? 0 : Process.Id; }
-//			set { Process = value <= 0 ? null : Process.GetProcessById(value, MachineName); }
-//		}x
-
-//		[DataMember]
-		public string ProcessName {
-			get { return Process == null ? string.Empty : Process.ProcessName; }
-		}
-
-		public Thread TraceThread { get; set; }
-
-		[DataMember]
-		public string ThreadId {
-			get { return _threadId ?? TraceThread.ManagedThreadId.ToString(); }
-			set { _threadId = value; }
-		}
-		private string _threadId;
-		
-//		[DataMember]
-		public string ThreadName {
-			get { return TraceThread == null ? string.Empty : TraceThread.Name; }
+		public byte[] BinaryData {
+			get
+			{
+				BinaryFormatter bf = new BinaryFormatter(null, new StreamingContext(StreamingContextStates.Remoting));
+				using (MemoryStream ms = new MemoryStream())
+				{
+					bf.Serialize(ms, Data);
+					bf.Serialize(ms, Stack);
+					return ms.ToArray();
+				}
+			}
+			set
+			{
+				BinaryFormatter bf = new BinaryFormatter(null, new StreamingContext(StreamingContextStates.Remoting));
+				using (MemoryStream ms = new MemoryStream(value))
+				{
+					Data = (Dictionary<string, object>)bf.Deserialize(ms);
+					Stack = (StackTrace)bf.Deserialize(ms);
+				}
+			}
 		}
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="TraceService.Message"/> class.
 		/// </summary>
+		internal Message()
+		{
+			;
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="TraceService.Message"/> class.
+		/// </summary>
+		/// <param name="source"></param>
 		/// <param name="data">Data.</param>
-		public Message(params object[] data)
+		public Message(Source source, params object[] data)
 		{
 			Time = DateTime.Now;
-			Stack = new StackTrace(1, true);
-			Level = MessageLevel.Information;
+			Domain = AppDomain.CurrentDomain;
+			DomainId = Domain.Id;
+			DomainName = Domain.FriendlyName;
+//			DomainSurvivedMemorySize = Domain.MonitoringSurvivedMemorySize;
+//			DomainTotalMemorySize = Domain.MonitoringTotalAllocatedMemorySize;
+//			DomainTotalProcessorTime = Domain.MonitoringTotalProcessorTime;
+			DomainBaseDirectory = Domain.BaseDirectory;
+			DomainDynamicDirectory = Domain.DynamicDirectory;
 
-			int di = 0;
+			Process = Process.GetCurrentProcess();
+			Thread = Thread.CurrentThread;
+			ThreadId = Thread.ManagedThreadId;
+			ThreadName = Thread.Name;
+			ThreadPriority = Thread.Priority;
+			ThreadState = Thread.ThreadState;
+			Source = source;
+			Id = source.NextMessageId;
+			Level = MessageLevel.Information;
+			Category = Description = string.Empty;			// Category and Description can be set if desired using property assignment (ie c'tor(...) { Category = ... , Description = ... })
+			Stack = new StackTrace(1, true);
 			Data = new Dictionary<string, object>();
 			foreach (object d in data)
 			{
-				di++;
 				Type dType = d.GetType();
 				if (dType.IsGenericType && dType.GetGenericTypeDefinition().IsEquivalentTo(
 					typeof(KeyValuePair<object,object>).GetGenericTypeDefinition()))
@@ -94,42 +196,34 @@ namespace TraceService
 					Data.Add(dPair.Key.ToString(), dPair.Value);
 				}
 				else
-					Data.Add(string.Format("Data{0:d2}", di), d);
+					Data.Add(string.Format("Data{0:d2}", Data.Count), d);
 			}
-
-			Domain = AppDomain.CurrentDomain;
-			Process = Process.GetCurrentProcess();
-			ProcessId = Process.Id;
-
-			MachineName = Process.MachineName;
-			TraceThread = Thread.CurrentThread;
 		}
 
-		[OnSerializing]
-		public void OnSerialize(StreamingContext context)
-		{
-//			using (DataStream = new MemoryStream(4096))
+//		#region Serialization callbacks
+//		[OnSerializing]
+//		public void OnSerialize(StreamingContext context)
+//		{
+//			BinaryFormatter bf = new BinaryFormatter(null, context);
+//			using (MemoryStream ms = new MemoryStream())
 //			{
-			DataStream = new MemoryStream(4096);
-			BinaryFormatter bf = new BinaryFormatter(null, context);
-				bf.Serialize(DataStream, Data);
-//				bf.Serialize(DataStream, Stack);
-//				DataBytes = DataStream.ToArray();
+//				bf.Serialize(ms, Data);
+//				bf.Serialize(ms, Stack);
+//				_binaryData = ms.ToArray();
 //			}
-		}
-
-		[OnDeserializing]
-		public void OnDeserialize(StreamingContext context)
-		{
-			Console.WriteLine("DataStream is {0} bytes long", DataStream == null ? "(null)" : DataStream.Length.ToString());
-
-//			using (DataStream = new MemoryStream(DataBytes))
+//		}
+//
+//		[OnDeserializing]
+//		public void OnDeserialize(StreamingContext context)
+//		{
+//			BinaryFormatter bf = new BinaryFormatter(null, context);
+//			using (MemoryStream ms = new MemoryStream(_binaryData))
 //			{
-			BinaryFormatter bf = new BinaryFormatter(null, context);
-				Data = (IDictionary<string, object>)bf.Deserialize(DataStream);
-//				Stack = (StackTrace)bf.Deserialize(DataStream);
+//				Data = (Dictionary<string, object>)bf.Deserialize(ms);
+//				Stack = (StackTrace)bf.Deserialize(ms);
 //			}
-		}
+//		}
+//		#endregion
 
 		/// <summary>
 		/// The _to string.
@@ -144,21 +238,18 @@ namespace TraceService
 		{
 			if (_toString != null)
 				return _toString;
-
-			StringBuilder sb = new StringBuilder(string.Format("{0}: {1}: {2}/{3}: {4}/{5}: {6}\n", Time.ToString(),
-				MachineName, ProcessId.ToString(), ProcessName, ThreadId, ThreadName, Description ?? string.Empty));
-			
+			StringBuilder sb = new StringBuilder(1024);
+			sb.AppendFormat("{0}: {1}/{2}: {3}: {4}/{5}: {6}/{7}: {8} {9} {10} {11}{12}\n", Time, DomainId, DomainName,			// TODO: Null reference exceptions happening here
+				MachineName, ProcessId, ProcessName, ThreadId, ThreadName, Source.Name, Id, Level,
+				string.IsNullOrWhiteSpace(Category) ? string.Empty : string.Concat(Category, " "), Description);
 			if (Data != null && Data.Count > 0)
 			{
-				sb.AppendLine(string.Format("Data ({0} values):", Data.Count.ToString()));
+				sb.AppendFormat("Data ({0} values):\n", Data.Count);
 				foreach (KeyValuePair<string, object> data in Data)
-					sb.AppendLine(string.Format("\t{0}={1}", data.Key, data.Value == null ? "(null)" : data.Value.ToString()));
+					sb.AppendFormat("\t{0}={1}\n", data.Key, data.Value == null ? "(null)" : data.Value.ToString());
 			}
 			if (Stack != null)
-			{
-				sb.AppendLine("Stack:");
-				sb.Append(Stack.ToString());
-			}
+				sb.AppendFormat("Stack ({0} frames):\n{1}\n", Stack.FrameCount, Stack.ToString());
 			return _toString = Stack == null ? sb.ToString(0, sb.Length - 1) : sb.ToString();
 		}
 	}

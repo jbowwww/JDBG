@@ -8,6 +8,8 @@ using System.ServiceModel.Channels;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Net.Mime;
+using System.Reflection;
+using System.Diagnostics;
 
 
 namespace TraceService
@@ -18,7 +20,7 @@ namespace TraceService
 
 		public static TimeSpan HostOpenCloseTimeout = TimeSpan.FromSeconds(10);
 
-		public static int HostThreadLoopDelay = 111;
+		public static int HostThreadLoopDelay = 222;
 
 		public static TraceService Service;
 
@@ -48,39 +50,58 @@ namespace TraceService
 
 		public static void Main(string[] argv)
 		{
-			ProcessArgs(argv);
+			AppDomain.CurrentDomain.UnhandledException += (object sender, UnhandledExceptionEventArgs e) =>
+			{
+				Exception ex = ((Exception)e.ExceptionObject);
+				Console.WriteLine("Domain: {0}: {1}: Unhandled Exception: {2}\n{3}", DateTime.Now, sender ?? "(null)", ex.GetType().FullName, ex);
+			};
+			AppDomain.CurrentDomain.AssemblyLoad += (object sender, AssemblyLoadEventArgs args) =>
+			{
+				Console.WriteLine("Domain: {0}: {1}: Load Assembly: {2}", DateTime.Now, sender, args.LoadedAssembly.GetName());
+			};
+			AppDomain.CurrentDomain.DomainUnload += (object sender, EventArgs e) =>
+			{
+				Console.WriteLine("Domain: {0}: {1}: Domain Unload", DateTime.Now, sender ?? "(null)");
+			};
+			AppDomain.CurrentDomain.ProcessExit += (object sender, EventArgs e) =>
+			{
+				Console.WriteLine("Domain: {0}: {1}: Process Exit", DateTime.Now, sender ?? "(null)");
+			};
 
-			using (Host = new ServiceHost(typeof(TraceService)))		//, new Uri[] { new Uri(BaseUri) }))
+			ProcessArgs(argv);
+//			AppDomain.CurrentDomain.AssemblyResolve += (sender, args) => Assembly.LoadFile(args.);
+			using (Host = new ServiceHost(typeof(TraceService)))
 			{
 				Host.OpenTimeout = Host.CloseTimeout = Timeout;
-				Host.AddServiceEndpoint(typeof(ITraceService), Binding, BaseUri);
+				ServiceEndpoint epTraceService = Host.AddServiceEndpoint(typeof(ITraceService), Binding, BaseUri);
 
-				Host.Opening += (sender, e) => Console.WriteLine("Service: {0}: Opening", sender.ToString());		// += async (sender, e) => Console.WriteLine("{0}: Opening", sender.ToString());
-				Host.Opened += (sender, e) => Console.WriteLine("Service: {0}: Opened", sender.ToString());
-				Host.Closing += (sender, e) => Console.WriteLine("Service: {0}: Closing", sender.ToString());
-				Host.Closed += (sender, e) => Console.WriteLine("Service: {0}: Closed", sender.ToString());
-				Host.UnknownMessageReceived += (sender, e) => Console.WriteLine("Service: {0}: UnknownMessageReceived: {1}", sender.ToString(), e.Message.ToString());
-
-				Console.WriteLine("Service: Host: {0}{1} - {2}", Host.Description.Namespace, Host.Description.Name, Host.Description.ServiceType.FullName);
-				if (Host.BaseAddresses.Count > 0)
+				foreach (OperationDescription op in epTraceService.Contract.Operations)
 				{
-					Console.WriteLine("Service: Base Addresses:");
+					DataContractSerializerOperationBehavior dcsob = op.Behaviors.Find<DataContractSerializerOperationBehavior>();
+					if (dcsob == null)
+						op.Behaviors.Add(dcsob = new DataContractSerializerOperationBehavior(op, new DataContractFormatAttribute() { }));
+					dcsob.DataContractSurrogate = new TraceServiceSurrogate();			//			dcsob.DataContractResolver = new System.Runtime.Serialization.DataContractResolver
+				}
+
+				Host.Opening += (sender, e) => {
+					Console.WriteLine("Service: {0}: {1}: Opening: {2}{3}: {4}", DateTime.Now, sender.ToString(),
+						Host.Description.Namespace, Host.Description.Name, Host.Description.ServiceType.FullName);
 					foreach (Uri baseUri in Host.BaseAddresses)
-						Console.WriteLine("\t{0}", baseUri.ToString());
-				}
-				if (Host.Description.Endpoints.Count > 0)
-				{
-					Console.WriteLine("Service: Endpoints:");
+						Console.WriteLine("    Base Address: {0}", Host.BaseAddresses[0]);
 					foreach (ServiceEndpoint endpoint in Host.Description.Endpoints)
-						Console.WriteLine("\t{0}{1} {2}", endpoint.Contract.Namespace, endpoint.Contract.Name, endpoint.Address.Uri.ToString());
-				}
-				Console.WriteLine();
+						Console.WriteLine("    Endpoint: {0}{1} {2}", endpoint.Contract.Namespace, endpoint.Contract.Name, endpoint.Address.Uri.ToString());
+				};
+				Host.Opened += (sender, e) => Console.WriteLine("Service: {0}: {1}: Opened", DateTime.Now, sender.ToString());
+				Host.Closing += (sender, e) => Console.WriteLine("Service: {0}: {1}: Closing", DateTime.Now, sender.ToString());
+				Host.Closed += (sender, e) => Console.WriteLine("Service: {0}: {1}: Closed", DateTime.Now, sender.ToString());
+				Host.UnknownMessageReceived += (sender, e) => Console.WriteLine("Service: {0}: {1}: UnknownMessageReceived: {2}", DateTime.Now, sender.ToString(), e.Message.ToString());
 
 				Host.Open();
-				while (Host.State == CommunicationState.Opening || Host.State == CommunicationState.Opened)
-				{
+//				while (Host.State == CommunicationState.Opening || Host.State == CommunicationState.Opened)
+//				{
 					Thread.Sleep(HostThreadLoopDelay);
-				}
+//				}
+				Process.GetCurrentProcess().WaitForExit();
 			}
 		}
 	}

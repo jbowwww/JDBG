@@ -1,0 +1,14 @@
+14/04/2014 2:35:42 AM: 0/TraceClientTest.exe: localhost: 29084/TraceClientTest: 1/: TraceClientTest 0 Information Test Testicles 1 2
+Data (1 values):
+	Data00=00000000-0000-0000-0000-000000000000
+Stack (2 frames):
+   at TraceService.Source.Log(MessageLevel level, System.String category, System.String description, System.Object[] data) in /home/jk/Code/Projects/NET/JDBG/TraceService/Source.cs:line 186
+   at TraceClientTest.MainClass.Main(System.String[] argv) in /home/jk/Code/Projects/NET/JDBG/TraceClientTest/MainClass.cs:line 65
+
+14/04/2014 2:35:42 AM: 0/TraceClientTest.exe: localhost: 29084/TraceClientTest: 1/: TraceClientTest 1 Verbose Test Bitses
+Data (1 values):
+	Data00=System.Collections.BitArray
+Stack (2 frames):
+   at TraceService.Source.Log(MessageLevel level, System.String category, System.String description, System.Object[] data) in /home/jk/Code/Projects/NET/JDBG/TraceService/Source.cs:line 186
+   at TraceClientTest.MainClass.Main(System.String[] argv) in /home/jk/Code/Projects/NET/JDBG/TraceClientTest/MainClass.cs:line 66
+
