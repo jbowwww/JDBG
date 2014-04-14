@@ -1,13 +1,25 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="TraceService/MainClass.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="TraceClientTest/MainClass.cs">
     <Files>
-      <File FileName="TraceService/Message.cs" Line="66" Column="3" />
-      <File FileName="TraceService/MainClass.cs" Line="69" Column="4" />
+      <File FileName="TraceService/Message.cs" Line="1" Column="1" />
+      <File FileName="TraceService/MainClass.cs" Line="72" Column="91" />
       <File FileName="TraceService/Surrogates/ThreadSurrogated.cs" Line="1" Column="1" />
-      <File FileName="TraceClientTest/MainClass.cs" Line="1" Column="1" />
-      <File FileName="../../../../../../media/Trapdoor/software/Dev/IDE/MonoDevelop/monodevelop-4.2.2/external/mono-addins/Mono.Addins/Mono.Addins.Serialization/BinaryXmlReader.cs" Line="26" Column="67" />
+      <File FileName="TraceClientTest/MainClass.cs" Line="34" Column="4" />
+      <File FileName="TraceService/TraceProxy.cs" Line="60" Column="48" />
+      <File FileName="TraceService/TraceService.cs" Line="14" Column="50" />
+      <File FileName="TraceService/ITraceService.cs" Line="10" Column="2" />
     </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State expanded="True">
+          <Node name="TraceClientTest" expanded="True">
+            <Node name="MainClass.cs" selected="True" />
+          </Node>
+          <Node name="TraceService" expanded="True" />
+        </State>
+      </Pad>
+    </Pads>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore>
