@@ -21,7 +21,7 @@ namespace TraceService
 		public TraceService()
 		{
 			_file = File.Open("Trace.txt", FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
-			Console.WriteLine("Service: Opened file \"{0}\"", _file.Name);
+//			Console.WriteLine("{0}: TraceService: Opened file \"{1}\"", DateTime.Now, _file.Name);
 		}
 
 		/// <summary>
@@ -48,7 +48,7 @@ namespace TraceService
 		{
 			if (_file != null)
 			{
-				Console.WriteLine("Service: {0}: Closing file \"{1}\"", DateTime.Now, _file.Name);
+//				Console.WriteLine("{0} TraceService: Closing file \"{1}\"", DateTime.Now, _file.Name);
 				_file.Close();
 				_file = null;
 			}
@@ -70,7 +70,7 @@ namespace TraceService
 		/// <remarks>ITraceService implementation</remarks>
 		public void Trace(Message message)
 		{
-			Console.WriteLine("Service: {0}: Writing \"{1}\"", DateTime.Now, message.ToString());
+//			Console.WriteLine("{0}: TraceService: Writing: {1}", DateTime.Now, message.ToString());
 			byte[] buf = Encoding.ASCII.GetBytes(string.Concat(message.ToString(), "\n"));
 			_file.Write(buf, 0, buf.Length);
 			_file.Flush();

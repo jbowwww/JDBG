@@ -2,6 +2,11 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Runtime.Serialization;
+using System.Reflection;
+using Mono.Security.X509;
+using System.Diagnostics;
+using System.Text;
+using Mono.CodeGeneration;
 
 namespace TraceService
 {
@@ -26,25 +31,33 @@ namespace TraceService
 		/// <summary>
 		/// The _sources.
 		/// </summary>
-		private static ConcurrentDictionary<string, Source> _sources;
+		private static readonly ConcurrentDictionary<string, Source> _sources = new ConcurrentDictionary<string, Source>();
 
 		/// <summary>
 		/// The exit all source threads.
 		/// </summary>
-		private static bool ExitAllSourceThreads;
+		private static bool _exitAllThreads;
+
+		public static readonly ConcurrentBag<Listener> GlobalListeners = new ConcurrentBag<Listener>();
+
+		/// <summary>
+		/// Gets the or create.
+		/// </summary>
+		/// <returns>The or create.</returns>
+		/// <param name="listeners">Listeners.</param>
+		public static Source GetOrCreate(params Listener[] listeners)
+		{
+			return Source.GetOrCreate(Assembly.GetExecutingAssembly().GetName().Name, listeners);
+		}
 
 		/// <summary>
 		/// Gets the or create.
 		/// </summary>
 		/// <returns>The or create.</returns>
 		/// <param name="name">Name.</param>
-		public static Source GetOrCreate(string name, bool start = true, params Listener[] listeners)
+		public static Source GetOrCreate(string name, params Listener[] listeners)
 		{
-			if (_sources == null)
-				_sources = new ConcurrentDictionary<string, Source>();
-			if (!_sources.ContainsKey(name))
-				_sources.TryAdd(name, new Source(name, start, listeners));
-			return _sources[name];
+			return _sources.ContainsKey(name) ? _sources[name] : new Source(name, true, listeners);
 		}
 
 		/// <summary>
@@ -52,7 +65,7 @@ namespace TraceService
 		/// </summary>
 		public static void StopAll()
 		{
-			ExitAllSourceThreads = true;
+			_exitAllThreads = true;
 		}
 
 		/// <summary>
@@ -74,12 +87,12 @@ namespace TraceService
 		/// <summary>
 		/// The source thread.
 		/// </summary>
-		private Thread SourceThread;
+		private Thread _thread;
 
 		/// <summary>
 		/// The exit source thread.
 		/// </summary>
-		private bool ExitSourceThread;
+		private bool _exitThread;
 
 		/// <summary>
 		/// The _next message identifier.
@@ -117,11 +130,14 @@ namespace TraceService
 		/// <param name="name">Name.</param>
 		public Source(string name, bool start = true, params Listener[] listeners)
 		{
+			if (_sources.ContainsKey(name))
+				throw new ArgumentException("Source name already in use", "name");
 			Name = name;
 			_messageQueue = new ConcurrentQueue<Message>();
 			Listeners = new ConcurrentBag<Listener>(listeners);
 			if (start)
 				Start();
+			_sources.TryAdd(name, this);
 		}
 
 		/// <summary>
@@ -129,12 +145,12 @@ namespace TraceService
 		/// </summary>
 		public void Start()
 		{
-			SourceThread = new Thread((thisService) => ((Source)thisService).Run())
+			_thread = new Thread((thisService) => ((Source)thisService).Run())
 			{
 				Name = "TraceService.Source.Run",
 				Priority = ThreadPriority.BelowNormal
 			 };
-			SourceThread.Start(this);
+			_thread.Start(this);
 		}
 
 		/// <summary>
@@ -142,7 +158,7 @@ namespace TraceService
 		/// </summary>
 		public void Stop()
 		{
-			ExitSourceThread = true;
+			_exitThread = true;
 		}
 
 		/// <summary>
@@ -150,28 +166,38 @@ namespace TraceService
 		/// </summary>
 		public void Wait()
 		{
-			while (SourceThread != null)
+			while (_thread != null)
 				Thread.Sleep(LoopDelay);
 		}
 
 		/// <summary>
 		/// Runs the service.
 		/// </summary>
-		public void Run()
+		internal virtual void Run()
 		{
 			Message message;
-			while ((!ExitSourceThread && !ExitAllSourceThreads) || !_messageQueue.IsEmpty)
+			while ((!_exitThread && !_exitAllThreads) || !_messageQueue.IsEmpty)
 			{
 				if (!_messageQueue.IsEmpty)
 				{
 					while (_messageQueue.TryDequeue(out message))
+					{
 						foreach (Listener listener in Listeners)
-							listener.Trace(message);
+							lock (listener.SyncRoot)
+							{
+								listener.Trace(message);
+							}
+						foreach (Listener listener in GlobalListeners)
+							lock (listener.SyncRoot)
+							{
+								listener.Trace(message);
+							}
+					}
 				}
 				else
 					Thread.Sleep(LoopDelay);
 			}
-			SourceThread = null;
+			_thread = null;
 		}
 
 		/// <summary>
@@ -188,6 +214,84 @@ namespace TraceService
 				Level = level,
 				Category = category,
 				Description = description
+			};
+			Log(msg);
+		}
+
+		/// <summary>
+		/// Log the specified level, category, description and data.
+		/// </summary>
+		/// <param name="level">Level.</param>
+		/// <param name="description">Description.</param>
+		/// <param name="data">Data.</param>
+		public void Log(MessageLevel level, string description, params object[] data)
+		{
+			Message msg = new Message(this, data)
+			{
+				Level = level,
+				Description = description
+			};
+			Log(msg);
+		}
+
+		/// <summary>
+		/// Log the specified level, category, description and data.
+		/// </summary>
+		/// <param name="level">Level.</param>
+		/// <param name="data">Data.</param>
+		public void Log(MessageLevel level, params object[] data)
+		{
+			Message msg = new Message(this, data)
+			{
+				Level = level
+			};
+			Log(msg);
+		}
+
+		/// <summary>
+		/// Logs the method call.
+		/// </summary>
+		/// <param name="level">Level.</param>
+		/// <param name="data">Data.</param>
+		public void LogMethodCall(MessageLevel level, params object[] data)
+		{
+			StackFrame sf = new StackFrame(1, true);
+			MethodBase method = sf.GetMethod();
+			StringBuilder sb = new StringBuilder(256);
+			sb.AppendFormat("{0}.{1}", method.DeclaringType.FullName, method.Name);
+			if (method.ContainsGenericParameters)
+			{
+				sb.Append("<");
+				foreach (Type TParam in method.GetGenericArguments())
+					sb.AppendFormat("{0}, ", TParam.FullName);
+				sb.Remove(sb.Length - 2, 2);
+				sb.Append(">");
+			}
+			sb.Append("(");
+			foreach (ParameterInfo pi in sf.GetMethod().GetParameters())
+				sb.AppendFormat("{0} {1}, ", pi.ParameterType.FullName, pi.Name);
+			sb.Remove(sb.Length - 2, 2);
+			sb.Append(")");
+			Message msg = new Message(this, data)
+			{
+				Level = level,
+				Category = "Execution",
+				Description = "Method Call"
+			};
+			Log(msg);
+		}
+
+		/// <summary>
+		/// Logs the exception.
+		/// </summary>
+		/// <param name="ex">Ex.</param>
+		/// <param name="data">Data.</param>
+		public void LogException(Exception ex, params object[] data)
+		{
+			Message msg = new Message(this, data) {
+				Level = MessageLevel.Error,
+				Category = "Execution",
+				Description = ex.ToString()		//.GetType().FullName
 			};
 			Log(msg);
 		}

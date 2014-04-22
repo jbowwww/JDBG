@@ -8,6 +8,7 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 using System.Runtime.Remoting.Messaging;
+using System.Reflection;
 
 namespace TraceService
 {
@@ -184,7 +185,7 @@ namespace TraceService
 			Id = source.NextMessageId;
 			Level = MessageLevel.Information;
 			Category = Description = string.Empty;			// Category and Description can be set if desired using property assignment (ie c'tor(...) { Category = ... , Description = ... })
-			Stack = new StackTrace(1, true);
+			Stack = new StackTrace(2, true);
 			Data = new Dictionary<string, object>();
 			foreach (object d in data)
 			{
@@ -236,21 +237,42 @@ namespace TraceService
 		/// <returns>A <see cref="System.String"/> that represents the current <see cref="TraceService.Message"/>.</returns>
 		public override string ToString()
 		{
+			return ToString(false);
+		}
+
+		/// <summary>
+		/// Returns a <see cref="System.String"/> that represents the current <see cref="TraceService.Message"/>.
+		/// </summary>
+		/// <returns>A <see cref="System.String"/> that represents the current <see cref="TraceService.Message"/>.</returns>
+		public string ToString(bool verbose = false)
+		{
+			StringBuilder sb;
 			if (_toString != null)
-				return _toString;
-			StringBuilder sb = new StringBuilder(1024);
-			sb.AppendFormat("{0}: {1}/{2}: {3}: {4}/{5}: {6}/{7}: {8} {9} {10} {11}{12}\n", Time, DomainId, DomainName,			// TODO: Null reference exceptions happening here
-				MachineName, ProcessId, ProcessName, ThreadId, ThreadName, Source.Name, Id, Level,
-				string.IsNullOrWhiteSpace(Category) ? string.Empty : string.Concat(Category, " "), Description);
-			if (Data != null && Data.Count > 0)
+				sb = new StringBuilder(_toString, 1024);
+			else
 			{
-				sb.AppendFormat("Data ({0} values):\n", Data.Count);
-				foreach (KeyValuePair<string, object> data in Data)
-					sb.AppendFormat("\t{0}={1}\n", data.Key, data.Value == null ? "(null)" : data.Value.ToString());
+				StackFrame frame = Stack.GetFrame(0);
+				MethodBase method = frame.GetMethod();
+				string source = string.Format("{0}:{1},{2} (+0x{3:x})", frame.GetFileName(), frame.GetFileLineNumber(), frame.GetFileColumnNumber(), frame.GetILOffset());
+				sb = new StringBuilder(1024);
+				sb.AppendFormat("{0}: {1}/{2}: {3}: {4}/{5}: {6}/{7}: {8}: {9}: {10} {11} ({12}) {13}{14}", Time, DomainId, DomainName,			// TODO: Null reference exceptions happening here
+					MachineName, ProcessId, ProcessName, ThreadId, ThreadName, Source.Name,
+					string.Concat(method.DeclaringType, ".", method.Name), Id, Level, source,
+					string.IsNullOrWhiteSpace(Category) ? string.Empty : string.Concat(Category, " "), Description);
+				_toString = sb.ToString();
 			}
-			if (Stack != null)
-				sb.AppendFormat("Stack ({0} frames):\n{1}\n", Stack.FrameCount, Stack.ToString());
-			return _toString = Stack == null ? sb.ToString(0, sb.Length - 1) : sb.ToString();
+			if (verbose)
+			{
+				if (Data != null && Data.Count > 0)
+				{
+					sb.AppendFormat("\nData ({0} values):", Data.Count);
+					foreach (KeyValuePair<string, object> data in Data)
+						sb.AppendFormat("\n\t{0}={1}", data.Key, data.Value == null ? "(null)" : data.Value.ToString());
+				}
+				if (Stack != null)
+					sb.AppendFormat("\nStack ({0} frames):\n{1}", Stack.FrameCount, Stack.ToString());
+			}
+			return sb.ToString();
 		}
 	}
 }

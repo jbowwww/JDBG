@@ -7,6 +7,8 @@ namespace TraceService
 	/// </summary>
 	public abstract class Listener : Disposable
 	{
+		internal object SyncRoot = new object();
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="TraceService.Listener"/> class.
 		/// </summary>
